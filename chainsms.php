@@ -215,7 +215,7 @@ function chainsms_civicrm_navigationMenu( &$params ) {
     'attributes' => array (
       'label' => 'Chain SMS Messages',
       'name' => 'SMSSurveyChains',
-      'url' => 'civicrm/sms/chains',
+      'url' => 'civicrm/smssurvey/chains',
       'permission' => 'view all contacts',
       'operator' => NULL,
       'separator' => FALSE,
@@ -231,7 +231,7 @@ function chainsms_civicrm_navigationMenu( &$params ) {
     'attributes' => array (
       'label' => 'Translate Responses',
       'name' => 'Translator',
-      'url' => 'civicrm/chainsms/translate',
+      'url' => 'civicrm/smssurvey/translate',
       'permission' => 'view all contacts',
       'operator' => NULL,
       'separator' => FALSE,
@@ -247,7 +247,7 @@ function chainsms_civicrm_navigationMenu( &$params ) {
     'attributes' => array (
       'label' => 'Clean Translated Responses',
       'name' => 'TranslationCleaner',
-      'url' => 'civicrm/chainsms/translationcleaning',
+      'url' => 'civicrm/smssurvey/translationcleaning',
       'permission' => 'view all contacts',
       'operator' => NULL,
       'separator' => FALSE,

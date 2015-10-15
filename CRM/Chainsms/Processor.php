@@ -14,9 +14,42 @@ class CRM_Chainsms_Processor{
     $this->OutboundSMSActivityTypeId = CRM_Core_OptionGroup::getValue('activity_type', 'SMS', 'name');
     $this->OutboundMassSMSActivityTypeId = CRM_Core_OptionGroup::getValue('activity_type', 'Mass SMS', 'name');
     $this->InboundSMSActivityTypeId = CRM_Core_OptionGroup::getValue('activity_type', 'Inbound SMS', 'name');
+
+    $storedSafeWords = CRM_Core_BAO_Setting::getItem('org.thirdsectordesign.chainsms', 'safe_list');
+    $storedBadWords = CRM_Core_BAO_Setting::getItem('org.thirdsectordesign.chainsms', 'swear_list');
+    $this->storedSafeWords = $storedSafeWords ? $storedSafeWords : array();
+    $this->storedBadWords = $storedBadWords ? $storedBadWords : array();
+  }
+
+  /*
+   * Remove the safe words, check for swear words, bail if you find any
+   * @param string $response, the raw response as the user returns it
+   */
+  public function doesResponseContainBadWord($response){
+    $response = strtolower($response);
+
+    foreach($this->storedSafeWords as $safeWord){
+      $response = str_replace(strtolower($safeWord), '', $response);
+    }
+
+    foreach ($this->storedBadWords as $badWord){
+      if (strpos($response, strtolower($badWord)) !== false){
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
   function inbound($inboundActivity){
+
+    if (strtolower($inboundActivity['details']) == 'stop') {
+      return; // user has instructed us to stop, bail.
+    }
+
+    if ($this->doesResponseContainBadWord($inboundActivity['details'])) {
+      return; // perhaps the user has sworn at us. Don't send them anything, let cleaning take care of it.
+    }
 
     // Work out whether this is an answer to a question...
 
@@ -76,13 +109,13 @@ class CRM_Chainsms_Processor{
   static function cleanInboundResponse($sInboundText){
     // the aim is to send a response even if "A :)" or "A." is received instead of "A"
   	$aCharactersToDelete = array(':', ';', ')', '(', '.', ' ', ',', '-', "'", '*', '^', 'o', 'x', 'p', 'O', 'X', 'P', '!', '<', '3'); // use single characters to prevent smilies like (: not getting picked up
-	
-	$sCleanedText = $sInboundText;
-	
-	foreach($aCharactersToDelete as $sCharToDelete){ // replace each of them
-		$sCleanedText = str_replace($sCharToDelete, '', $sCleanedText);
-	}	
-		
+
+    $sCleanedText = $sInboundText;
+
+    foreach($aCharactersToDelete as $sCharToDelete){ // replace each of them
+      $sCleanedText = str_replace($sCharToDelete, '', $sCleanedText);
+    }
+
   	return $sCleanedText;
   }
 
@@ -203,7 +236,7 @@ class CRM_Chainsms_Processor{
          AND cac.contact_id           =  %1
       ORDER BY
       activity_date_time DESC
-      LIMIT 1,1        
+      LIMIT 1,1
       ";
 
     $params[1]=array($source_contact_id, 'Integer');
@@ -211,7 +244,7 @@ class CRM_Chainsms_Processor{
     if($activity->fetch()){
       return $activity;
     }else{
-      return 0; 
+      return 0;
     }
   }
 

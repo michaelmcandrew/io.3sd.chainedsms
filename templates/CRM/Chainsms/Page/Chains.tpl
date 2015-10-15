@@ -15,12 +15,12 @@
 <div>{$answer.cnmt_msg_text}</div>
 </td>
 <td>
-<a href="/civicrm/sms/chains/answer?action=update&id={$answer.cca_id}">edit</a> | 
-<a href="/civicrm/sms/chains/answer?action=delete&id={$answer.cca_id}">delete</a>
+<a href="/civicrm/smssurvey/answer?action=update&id={$answer.cca_id}">edit</a> | 
+<a href="/civicrm/smssurvey/answer?action=delete&id={$answer.cca_id}">delete</a>
 </td>
 <tr>
 {/foreach}
 </tbody>
 </table>
-<p><a href="/civicrm/sms/chains/answer?action=add&msg_template_id={$template.cmt_id}">add another answer</a>
+<p><a href="/civicrm/smssurvey/answer?action=add&msg_template_id={$template.cmt_id}">add another answer</a>
 {/foreach} 
