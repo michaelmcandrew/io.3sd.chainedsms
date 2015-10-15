@@ -62,15 +62,30 @@ function civicrm_api3_contact_sms($params) {
 	if(isset($params['msg_template_id'])){
         $messageTemplateParams=array('id'=>$params['msg_template_id']);
         $messageTemplateDefaults=array();
-        $messageTemplate = CRM_Core_BAO_MessageTemplates::retrieve($messageTemplateParams, $messageTemplateDefaults);
+        $messageTemplate = CRM_Core_BAO_MessageTemplate::retrieve($messageTemplateParams, $messageTemplateDefaults);
         $activityParams['text_message']=$messageTemplate->msg_text;
+        $activityParams['activity_subject'] = $messageTemplate->msg_subject;
     }elseif(isset($params['text'])){
         $activityParams['text_message']=$params['text'];
+        $activityParams['activity_subject'] = $params['text'];
     }else{
         return civicrm_api3_create_error('You should include either text or a msg_template_id');
     }
 	
 	$sms = CRM_Activity_BAO_Activity::sendSMS($contactDetails, $activityParams, $provider, $contactIds, $userID);
+  // Not just a matter of returning NULL on error
+  if (!is_array($sms) || $sms[0] !== TRUE) {
+    CRM_Core_Error::debug_log_message(
+      "ChainSMS civicrm_api3_contact_sms: sendSMS was not entirely successful"
+      . "\n  contactDetails: " . print_r($contactDetails, TRUE)
+      . "\n  activityParams: " . print_r($activityParams, TRUE)
+      . "\n  provider: "       . print_r($provider,       TRUE)
+      . "\n  contactIds: "     . print_r($contactIds,     TRUE)
+      . "\n  userID: "         . print_r($userID,         TRUE)
+      //. "\n  return: "         . print_r($sms,            TRUE) // Output too large here
+    );
+  }
+
     $created_activity = civicrm_api('Activity', 'get', array('version' => 3, 'id' => $sms[1]));
    if(!$created_activity['count']){
      return civicrm_api3_create_success();
