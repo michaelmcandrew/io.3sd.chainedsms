@@ -29,7 +29,8 @@ function chainsms_civicrm_install() {
   CRM_Core_BAO_Setting::setItem(array(), 'org.thirdsectordesign.chainsms', 'swear_list');
 
   // TODO create permission to view swear filter page.
-
+  
+  // Create SMS Conversation Activity Type
   $smsConversationActivityType = CRM_Core_OptionGroup::getValue('activity_type', 'SMS Conversation', 'name');
 
   if (empty($smsConversationActivityType)){
@@ -45,6 +46,17 @@ function chainsms_civicrm_install() {
     civicrm_api('ActivityType', 'create', $createSMSConversationActivityApiParams);
   }
 
+  // Create SMS Survey next message table map
+  CRM_Core_DAO::executeQuery('CREATE TABLE IF NOT EXISTS civicrm_chainsms_answer (
+      id int(11) NOT NULL AUTO_INCREMENT,
+      msg_template_id int(11) DEFAULT NULL,
+      answer varchar(255) DEFAULT NULL,
+      next_msg_template_id int(11) DEFAULT NULL,
+      PRIMARY KEY (id),
+      KEY index_question_id (msg_template_id),
+      KEY index_next_question_id (next_msg_template_id)
+    ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1');
+  
   return _chainsms_civix_civicrm_install();
 }
 
@@ -54,6 +66,8 @@ function chainsms_civicrm_install() {
 function chainsms_civicrm_uninstall() {
   // Wipe the swear filters.
   $dao = CRM_Core_DAO::executeQuery("DELETE FROM civicrm_setting WHERE group_name = 'org.thirdsectordesign.chainsms'");
+  // Remove the added table
+  $dao = CRM_Core_DAO::executeQuery("DROP TABLE civicrm_chainsms_answer");
   return _chainsms_civix_civicrm_uninstall();
 }
 
