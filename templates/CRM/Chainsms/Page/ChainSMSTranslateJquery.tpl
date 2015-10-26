@@ -104,7 +104,13 @@
 	
 	// connect changes in the Group Ids to the Group Name selector
 	jQuery('#GroupIds').change(groupIdsToGroupName);
-	
+
+        // set the description of the translator class
+    	jQuery('#TranslatorClass').change(function(){
+                var descriptionText = jQuery('option:selected', this).attr('description');
+                jQuery('#TranslatorDescription').text(descriptionText);
+        });
+
 	// perform button visible/invisible checks
 	function setButtonVisibility(){
 		iNumEmptyFields = 0;

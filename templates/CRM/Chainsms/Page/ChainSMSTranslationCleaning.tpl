@@ -5,7 +5,7 @@ SMS Survey Responses need to be "Translated" into fields in CiviCRM.
 
 After editing the input messages in the conversations here, they need to be translated for a second time.<br/><br/>
 You can either translate an existing group or <a href="/civicrm/group/add?reset=1">create a new group</a> for translation. 
-To translate a group, please click <a href="/civicrm/chainsms/translate">here</a>.<br/><br/>
+To translate a group, please click <a href="/civicrm/smssurvey/translate">here</a>.<br/><br/>
 
 Select your 'campaign' from the list:
 
@@ -36,9 +36,9 @@ You can optionally select a filter from the list: <select id="selectFilter">
 {if isset($sErrorMsg)}
 {$sErrorMsg}
 {else}
-{if $offset gt 0}<a href="/civicrm/chainsms/translationcleaning?campaign={$sCampaignName}&offset={$offset-1}&filter={$sFilter}">Previous contact</a>{/if}
+{if $offset gt 0}<a href="/civicrm/smssurvey/translationcleaning?campaign={$sCampaignName}&offset={$offset-1}&filter={$sFilter}">Previous contact</a>{/if}
 {if $offset gt 0 && $offset lt ($iCountInvalidSMSConversations -1)} | {/if}
-{if $offset lt ($iCountInvalidSMSConversations-1)}<a href="/civicrm/chainsms/translationcleaning?campaign={$sCampaignName}&offset={$offset+1}&filter={$sFilter}">Next contact</a> {/if} 
+{if $offset lt ($iCountInvalidSMSConversations-1)}<a href="/civicrm/smssurvey/translationcleaning?campaign={$sCampaignName}&offset={$offset+1}&filter={$sFilter}">Next contact</a> {/if} 
 ({$sPageNum} of {$iCountInvalidSMSConversations}).
 <br/><br/>
 <table>

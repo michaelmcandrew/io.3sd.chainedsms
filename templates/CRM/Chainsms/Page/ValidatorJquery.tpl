@@ -3,7 +3,7 @@
     
 // set the messages to validate    
 jQuery('#SMSMailing').change(function(){
-	window.location.href = "/civicrm/chainsms/validator?mailingId=" + jQuery(this).children(':selected').attr('id');
+	window.location.href = "/civicrm/smssurvey/validator?mailingId=" + jQuery(this).children(':selected').attr('id');
 });
 
 // select a group to add the contacts to

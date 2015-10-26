@@ -31,11 +31,11 @@ jQuery('.delete_activity').click(function(){
 });
 	
 jQuery('#selectCampaign').change(function(){
-	window.location.href = "/civicrm/chainsms/translationcleaning?campaign=" + jQuery(this).val() + "&offset=0";
+	window.location.href = "/civicrm/smssurvey/translationcleaning?campaign=" + jQuery(this).val() + "&offset=0";
 });	
 	
 jQuery('#selectFilter').change(function(){
-	window.location.href = "/civicrm/chainsms/translationcleaning?campaign=" + jQuery('#selectCampaign').val() + "&offset=0&filter=" + jQuery(this).val();
+	window.location.href = "/civicrm/smssurvey/translationcleaning?campaign=" + jQuery('#selectCampaign').val() + "&offset=0&filter=" + jQuery(this).val();
 });		
 	
 jQuery('#addContactToGroup').change(function(){

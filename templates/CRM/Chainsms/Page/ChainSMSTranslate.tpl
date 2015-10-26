@@ -17,29 +17,36 @@ To translate a batch of messages, select an SMS Mailing from the following list<
 <br><br>and/or enter your own details below:
 
 <br/><br/>
-<table style="margin-left: 50px; width:85%">
-<tr><td>Group Name</td><td>
-<select id="GroupName" >  
-	<option group_id="">- select -</option>
-		{foreach from=$aGroups item=eachGroup}
-			<option group_id="{$eachGroup.id}" >{$eachGroup.title}</option>
-		{/foreach}
-	<option group_id="multiple">- multiple groups -</option>
-	<option group_id="unknown">- unknown group -</option>
+<table style="padding-left: 50px; padding-right: 50px;">
+<tr>
+    <td>Group Name</td><td>
+        <select id="GroupName" >  
+            <option group_id="">- select -</option>
+                    {foreach from=$aGroups item=eachGroup}
+                            <option group_id="{$eachGroup.id}" >{$eachGroup.title}</option>
+                    {/foreach}
+            <option group_id="multiple">- multiple groups -</option>
+            <option group_id="unknown">- unknown group -</option>
 	</select>
-</td><td><em>This is only used to set the Group Ids in the field below.</em></td></tr>
+    </td>
+    <td style="width: 50%"><em>This is only used to set the Group Ids in the field below.</em></td>
+</tr>
 <tr><td>Group Ids</td><td><input id="GroupIds" type="text" size="50" class="inputField"></input></td><td><em>List of group ids separated by a comma e.g. 123,456.</em></td></tr>
 <tr><td>Translating Start Date</td><td><input id="StartDate" type="text" size="50" class="inputField"></input></td><td><em>No processing before this day. e.g. 2012-11-25.</em></td></tr>
 <tr><td>Translating Limit Date</td><td><input id="LimitDate" type="text" size="50" class="inputField"></input></td><td><em>No processing after this day - keep this as tight as possible! e.g. 2012-11-27.</em></td></tr>
 
-<tr><td>TranslationTypes</td><td>
-    <select id="TranslatorClass" class="inputField">  
-	<option group_id="">- select -</option>
-        {foreach from=$aTranslationOptions item=eachTranslationOption}
-                <option value="{$eachTranslationOption.value}">{$eachTranslationOption.name}</option>
-        {/foreach}
-    </select>
-</td></tr>
+<tr>
+    <td>TranslationTypes</td>
+    <td>
+        <select id="TranslatorClass" class="inputField">  
+            <option group_id="">- select -</option>
+            {foreach from=$aTranslationOptions item=eachTranslationOption}
+                    <option value="{$eachTranslationOption.value}" description='{$eachTranslationOption.description}'>{$eachTranslationOption.name}</option>
+            {/foreach}
+        </select>
+    </td>
+    <td id='TranslatorDescription'></td>
+</tr>
 <!--<tr><td>Translator Class</td><td><input id="TranslatorClass" type="text" size="50" class="inputField" value="CRM_Chainsms_Translator_FFNov12"></input></td><td><em>If in doubt leave CRM_Chainsms_Translator_FFNov12 as the default.</em></td></tr>-->
 <tr><td>Campaign Name</td><td><input id="CampaignName" type="text" size="50" class="inputField"></input></td><td><em>This appears as the finished SMS Conversation's Subject e.g. 2013 TS1b Y11.<br/>Campaigns are how statistics are determined and cleaning is performed.</em></td></tr>
 </table>
