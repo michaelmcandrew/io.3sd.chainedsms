@@ -1,40 +1,45 @@
 <?php
-class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTranslator implements CRM_Chainsms_Translator_TranslatorInterface{
-                
-  function __construct(){
+
+/**
+ * This file contains some Future First specific constant values. It is included
+ * for reference for other organisations attempting more sophisticated surveys.
+ */
+class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTranslator implements CRM_Chainsms_Translator_TranslatorInterface {
+
+  function __construct() {
     $this->generateMapping();
   }
-  
-  public static function getName(){
+
+  public static function getName() {
     return 'Future First Leavers Tracking Survey';
   }
-  
-  public static function getDescription(){
-    return 'Used to conduct Future First\'s annual tracking surveys.';
+
+  public static function getDescription() {
+    return 'Used to conduct Future First&#39;s annual School Leavers tracking surveys.';
   }
-  
+
   /*
    * Uses the CiviCRM API to get the organisations of a specific type
    */
-  static function getOrgNamesMap($organisationSubType, &$returnValues){
+
+  static function getOrgNamesMap($organisationSubType, &$returnValues) {
     $orgParams = array(
       'version' => 3,
       'sequential' => 0,
       'contact_sub_type' => 'Further_Education_Institution',
       'return' => 'display_name',
-      "rowCount" => 0,
+      'rowCount' => 0,
     );
-    
+
     $returnValues = array_merge($returnValues, civicrm_api("Contact", "get", $orgParams));
-    
-    if (civicrm_error($returnValues)){
+
+    if (civicrm_error($returnValues)) {
       watchdog("SMS Translator", "Error with colleges API request: " . print_r($returnValues['error_message'], TRUE), array(), WATCHDOG_ERROR);
     }
   }
-  
-  
+
   function generateMapping() {
-	
+
     // Load all higher institutions out of Civi
     $param = array(
       "version" => 3,
@@ -47,10 +52,10 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
 
     $universityMap = array();
 
-    foreach($result["values"] as $value) {
+    foreach ($result["values"] as $value) {
       $universityName = self::cleanTextResponse($value["display_name"]);
       $universityName = self::cleanUniversityName($universityName);
-      if(array_key_exists($universityName, $universityMap)) {
+      if (array_key_exists($universityName, $universityMap)) {
         //echo "University clash " . $universityMap[$universityName] . " with " . $value["contact_id"] . "\n";
       }
       $universityMap[$universityName] = $value["contact_id"];
@@ -80,7 +85,7 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
     $universityMap["st georges"] = 7981;
     $universityMap["st georges london"] = 7981;
     $universityMap["royal holloway"] = 7977;
-	  $universityMap["royal holloway london"] = 7977;
+    $universityMap["royal holloway london"] = 7977;
     $universityMap["city london"] = 7888;
     $universityMap["wales newport"] = 7953;
     $universityMap["uea"] = 7899;
@@ -91,124 +96,122 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
 
     $collegeMap = array();
     $collegeDuplicate = array();
-    
+
     $collegeApiResultsArray = array();
-    
+
     self::getOrgNamesMap("Further_Education_Institution", $collegeApiResultsArray);
     self::getOrgNamesMap("School", $collegeApiResultsArray);
-    
-    foreach($collegeApiResultsArray['values'] as $collegeId => $collegeValues){
+
+    foreach ($collegeApiResultsArray['values'] as $collegeId => $collegeValues) {
       $collegeName = self::cleanTextResponse($collegeValues["display_name"]);
-	    $collegeName = self::cleanCollegeName($collegeName);
+      $collegeName = self::cleanCollegeName($collegeName);
       $collegeMap[$collegeName] = $collegeId;
     }
-      
+
     $this->mapping["collegeMap"] = $collegeMap;
-    
+
     // Create a manual mapping of education (other that university options), the field
     // as there are multiple fields in Civi that store this data.
     // custom_41 = "Education summary" (Multiple choice field)
     // custom_68 = "Education - current"
     // custom_74 = "Non A-Level course"
     $aLevelUpdates = array("custom_41" => array("A-Levels" => 1), "custom_68" => "Doing_A-Levels");
-    $educationMap["alevel"]   = $aLevelUpdates;
-    $educationMap["a level"]  = $aLevelUpdates;
-    $educationMap["alevels"]  = $aLevelUpdates;
+    $educationMap["alevel"] = $aLevelUpdates;
+    $educationMap["a level"] = $aLevelUpdates;
+    $educationMap["alevels"] = $aLevelUpdates;
     $educationMap["a levels"] = $aLevelUpdates;
-    
+
     $asLevelUpdates = array("custom_41" => array("AS-Levels" => 1), "custom_68" => "Doing_A-Levels");
-    $educationMap["aslevel"]   = $asLevelUpdates;
-    $educationMap["as level"]  = $asLevelUpdates;
-    $educationMap["aslevels"]  = $asLevelUpdates;
+    $educationMap["aslevel"] = $asLevelUpdates;
+    $educationMap["as level"] = $asLevelUpdates;
+    $educationMap["aslevels"] = $asLevelUpdates;
     $educationMap["as levels"] = $asLevelUpdates;
-    
+
     $btecUpdates = array("custom_41" => array("BTEC" => 1), "custom_74" => "BTEC", "custom_68" => "Doing_a_course_other_than_A-levels_at_school_sixth_form_or_college");
-    $educationMap["btc"]   = $btecUpdates;
-    $educationMap["btec"]  = $btecUpdates;
-    $educationMap["btec"]  = $btecUpdates;
+    $educationMap["btc"] = $btecUpdates;
+    $educationMap["btec"] = $btecUpdates;
+    $educationMap["btec"] = $btecUpdates;
     $educationMap["btecs"] = $btecUpdates;
 
     $gcsesUpdates = array("custom_41" => array("GCSEs/O-Levels" => 1), "custom_74" => "GCSEs/O-Levels", "custom_68" => "Doing_a_course_other_than_A-levels_at_school_sixth_form_or_college");
     $educationMap["gcses"] = $gcsesUpdates;
-    
+
     $this->mapping["educationMap"] = $educationMap;
-    
+
     // Create a manual mapping of year group options
-    $yearGroupMap["11"]       = "eleven";
-    $yearGroupMap["12"]       = "twelve";
-    $yearGroupMap["13"]       = "thirteen";
-    $yearGroupMap["eleven"]   = "eleven";
-    $yearGroupMap["twelve"]   = "twelve";
+    $yearGroupMap["11"] = "eleven";
+    $yearGroupMap["12"] = "twelve";
+    $yearGroupMap["13"] = "thirteen";
+    $yearGroupMap["eleven"] = "eleven";
+    $yearGroupMap["twelve"] = "twelve";
     $yearGroupMap["thirteen"] = "thirteen";
-    
+
     $this->mapping["yearGroupMap"] = $yearGroupMap;
   }
 
-  function translate($contact){
+  function translate($contact) {
     $this->contact = $contact;
-    
+
     //create an empty array for the data
     $this->contact->data = array();
 
     //process the texts
-
     //check for bad words
     $this->checkForBadWords();
 
     //process each interaction
     reset($this->contact->texts);
-    while ($interaction = $this->getInteraction()){
+    while ($interaction = $this->getInteraction()) {
       $this->process($interaction);
     }
-    if(!isset($this->contact->data['CurrentOccupation'])){
+    if (!isset($this->contact->data['CurrentOccupation'])) {
       $this->autoFillCurrentOccupation();
     }
   }
-  
-	function generateLeavingDate($yearOffset) {
-		// They may answer this question any time between August and May,
-		// so we need to be able to generate the correct leaving date.
-		if(date("n") >= 7) {
-			$yearOffset++;
-		}
-		
-		$date = date("Y-07-31", strtotime("+" . $yearOffset . " YEAR"));
-		
-		return $date;
-	}
-	
-	function updateMultiSelect($field, $value, $contact_id) {
 
-		$param = array(
-				"version" => 3,
-				"entity_id" => $contact_id,
-				"entity_table" => "",
-				"return.$field" => 1,
-		);
-		
-		$result = civicrm_api("CustomValue", "Get", $param);
-		
-		$custom_field_key = array_keys($result["values"]);
-		if(count($custom_field_key) != 1) {
-			// Some contacts don't have data for this, so just return the array of values
-			// we wanted to add to their existing values.
-			return $value;
-		}
-		
-		$custom_field_key = $custom_field_key[0];
+  function generateLeavingDate($yearOffset) {
+    // They may answer this question any time between August and May,
+    // so we need to be able to generate the correct leaving date.
+    if (date("n") >= 7) {
+      $yearOffset++;
+    }
 
-		$newValue = array_fill_keys($result["values"][$custom_field_key]["latest"], 1);
-		
-		// Update the existing multiselect with these new values
-		foreach($value as $key => $value) {
-			$newValue[$key] = 1;
-		}
+    $date = date("Y-07-31", strtotime("+" . $yearOffset . " YEAR"));
 
-		return $newValue;
+    return $date;
+  }
 
-	}
+  function updateMultiSelect($field, $value, $contact_id) {
 
-  function autoFillCurrentOccupation(){
+    $param = array(
+      "version" => 3,
+      "entity_id" => $contact_id,
+      "entity_table" => "",
+      "return.$field" => 1,
+    );
+
+    $result = civicrm_api("CustomValue", "Get", $param);
+
+    $custom_field_key = array_keys($result["values"]);
+    if (count($custom_field_key) != 1) {
+      // Some contacts don't have data for this, so just return the array of values
+      // we wanted to add to their existing values.
+      return $value;
+    }
+
+    $custom_field_key = $custom_field_key[0];
+
+    $newValue = array_fill_keys($result["values"][$custom_field_key]["latest"], 1);
+
+    // Update the existing multiselect with these new values
+    foreach ($value as $key => $value) {
+      $newValue[$key] = 1;
+    }
+
+    return $newValue;
+  }
+
+  function autoFillCurrentOccupation() {
     $occupations = array(
       'University' => 'university',
       'Education' => 'educationNotUni',
@@ -217,20 +220,20 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
       'CurrentSchool' => 'haveNotLeft',
       'Other' => 'somethingElse',
     );
-    foreach($occupations as $occupation => $answer){
-      if(isset($this->contact->data[$occupation])){
+    foreach ($occupations as $occupation => $answer) {
+      if (isset($this->contact->data[$occupation])) {
         $this->contact->data['CurrentOccupation'] = $answer;
       }
     }
   }
 
-  function getInteraction(){
+  function getInteraction() {
     //check that the first text is outbound
-    
+
     $firstText = current($this->contact->texts);
-    if($firstText['direction'] != 'outbound'){
+    if ($firstText['direction'] != 'outbound') {
       return FALSE;
-    }else{
+    } else {
       $interaction['outbound'] = $firstText;
     }
     $secondText = next($this->contact->texts);
@@ -239,29 +242,29 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
     //or it could be a problem, i.e. an incomplete text.
     //Below, we check for both cases.
 
-    if($secondText == FALSE){
+    if ($secondText == FALSE) {
       //If the second text does not exist
-      if($firstText['msg_template_id'] == 80){
+      if ($firstText['msg_template_id'] == 80) {
         //If this is a thankyou text so that is fine.
         $interaction['inbound'] = NULL;
-      }else{
+      } else {
         //Else this is an incomplete interaction - record an error and return FALSE
         $this->contact->addError('Did not reply to text', 'incomplete');
         return FALSE;
       }
-    }elseif($secondText['direction']=='inbound'){
+    } elseif ($secondText['direction'] == 'inbound') {
       //if the next text is an inbound text, all is as expected, so record this inbound text
       $interaction['inbound'] = $secondText;
       //and advance the pointer ready for the next interaction grab
       next($this->contact->texts);
-    }else{
+    } else {
       //else stop grabbing the interaction (TODO record this as an error)
       return FALSE;
     }
     return $interaction;
   }
 
-  function process($interaction){
+  function process($interaction) {
     $functionMap = array(
       '75' => 'Year11Start',
       '76' => 'Working',
@@ -273,24 +276,23 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
       '85' => 'Year12Start',
       '86' => 'ConfirmYearGroup'
     );
-    if(in_array($interaction['outbound']['msg_template_id'], array_keys($functionMap))){
-      call_user_func(array($this, 'process'.$functionMap[$interaction['outbound']['msg_template_id']]), $interaction['inbound']['text']);
+    if (in_array($interaction['outbound']['msg_template_id'], array_keys($functionMap))) {
+      call_user_func(array($this, 'process' . $functionMap[$interaction['outbound']['msg_template_id']]), $interaction['inbound']['text']);
     }
   }
 
-  function cleanLetterResponse($response){
+  function cleanLetterResponse($response) {
     return strtolower(trim($response));
   }
 
   function cleanTextResponse($response) {
     $response = trim(preg_replace("/[^a-zA-Z 0-9\,]+/", "", $response));
-    
+
     return $response;
   }
 
   function cleanUniversityName($response) {
     $response = strtolower($response); // this used to be done in the cleanTextResponse
-    
     // Needed so we can also match at the end of the string
     $response .= " ";
 
@@ -324,7 +326,7 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
     return $response;
   }
 
-  function processYear11Start($response){
+  function processYear11Start($response) {
     $response = self::cleanLetterResponse($response);
     $answerMap = array(
       'a' => 'educationNotUni',
@@ -333,14 +335,14 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
       'd' => 'somethingElse',
       'e' => 'haveNotLeft'
     );
-    if(in_array($response, array_keys($answerMap))){
+    if (in_array($response, array_keys($answerMap))) {
       $this->contact->data['CurrentOccupation'] = $answerMap[$response];
-    }else{
+    } else {
       $this->contact->addError('Invalid reply to initial multiple choice question', '');
     }
   }
 
-  function processYear12Start($response){
+  function processYear12Start($response) {
     $response = self::cleanLetterResponse($response);
     $answerMap = array(
       'a' => 'educationNotUni',
@@ -350,14 +352,14 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
       'e' => 'somethingElse',
       'f' => 'haveNotLeft'
     );
-    if(in_array($response, array_keys($answerMap))){
+    if (in_array($response, array_keys($answerMap))) {
       $this->contact->data['CurrentOccupation'] = $answerMap[$response];
-    }else{
+    } else {
       $this->contact->addError('Invalid reply to initial multiple choice question', 'warning');
     }
   }
 
-  function processYear13UnknownStart($response){
+  function processYear13UnknownStart($response) {
     $response = self::cleanLetterResponse($response);
     $answerMap = array(
       'a' => 'university',
@@ -366,74 +368,74 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
       'd' => 'work',
       'e' => 'somethingElse'
     );
-    if(in_array($response, array_keys($answerMap))){
+    if (in_array($response, array_keys($answerMap))) {
       $this->contact->data['CurrentOccupation'] = $answerMap[$response];
-    }else{
+    } else {
       $this->contact->addError('Invalid reply to initial multiple choice question', 'warning');
     }
   }
 
-  function processUniversity($response){
+  function processUniversity($response) {
     $response = self::cleanTextResponse($response);
     //count number of commas in text
     $split = explode(',', $response);
-    if(count($split) == 2){
-      
+    if (count($split) == 2) {
+
       //set the institution and subject in the data object
       $this->contact->data['University']['subject'] = trim($split[1]);
-      
+
       //try and identify the university
       $this->contact->data['University']['institution'] = self::cleanUniversityName(trim($split[0]));
-      if(array_key_exists($this->contact->data['University']['institution'], $this->mapping["universityMap"])){
+      if (array_key_exists($this->contact->data['University']['institution'], $this->mapping["universityMap"])) {
         $this->contact->data['University']['institution_id'] = $this->mapping["universityMap"][$this->contact->data['University']['institution']];
-      }else{
+      } else {
         $this->contact->addError('Cannot find a contact in CiviCRM for this university');
       }
       // add the subject and the institution
-    }else{
+    } else {
       $this->contact->addError('Could not split the uni reply into exactly one university and subject');
     }
   }
 
-  function processWorking($response){
+  function processWorking($response) {
     $response = self::cleanTextResponse($response);
     //count number of commas in text
     $split = explode(',', $response);
-    if(count($split) == 2){
+    if (count($split) == 2) {
       $this->contact->data['Job']['job-title'] = trim($split[0]);
       $this->contact->data['Job']['employer'] = trim($split[1]);
       // add the subject and the institution
-    }else{
+    } else {
       $this->contact->addError('Could not split the job reply into exactly one employer and job title');
     }
   }
 
-  function processEducation($response){
+  function processEducation($response) {
     $response = self::cleanTextResponse($response);
     //count number of commas in text
     $split = explode(',', $response);
-    if(count($split) == 2){
+    if (count($split) == 2) {
       $this->contact->data['Education']['institution'] = self::cleanCollegeName(trim($split[1]));
       $this->contact->data['Education']['course'] = strtolower(trim($split[0]));
-      
-      if(array_key_exists($this->contact->data['Education']['course'], $this->mapping["educationMap"])){
-      	
-      	$this->contact->data['Education']['course_data'] = $this->mapping["educationMap"][
-      	  $this->contact->data['Education']['course']
-      	];
-      }else{
-      	$this->contact->addError( 'Could not determine the course');
-      }
-      
-      if(array_key_exists($this->contact->data['Education']['institution'], $this->mapping["collegeMap"])){
-        $this->contact->data['Education']['institution_id'] = $this->mapping["collegeMap"][
-          $this->contact->data['Education']['institution']
+
+      if (array_key_exists($this->contact->data['Education']['course'], $this->mapping["educationMap"])) {
+
+        $this->contact->data['Education']['course_data'] = $this->mapping["educationMap"][
+            $this->contact->data['Education']['course']
         ];
-      }else{
-        $this->contact->addError( 'Cannot find a contact in CiviCRM for this institution');
+      } else {
+        $this->contact->addError('Could not determine the course');
       }
-    }else{
-      $this->contact->addError( 'Could not split the education reply into exactly one institution and course');
+
+      if (array_key_exists($this->contact->data['Education']['institution'], $this->mapping["collegeMap"])) {
+        $this->contact->data['Education']['institution_id'] = $this->mapping["collegeMap"][
+            $this->contact->data['Education']['institution']
+        ];
+      } else {
+        $this->contact->addError('Cannot find a contact in CiviCRM for this institution');
+      }
+    } else {
+      $this->contact->addError('Could not split the education reply into exactly one institution and course');
     }
   }
 
@@ -443,120 +445,119 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
     $split = explode(',', $response);
     if (count($split) == 2) {
       // add the title and the employer
-      $this->contact->data['Apprenticeship']['title']    = trim($split[0]);
+      $this->contact->data['Apprenticeship']['title'] = trim($split[0]);
       $this->contact->data['Apprenticeship']['employer'] = trim($split[1]);
-    }
-    else {
+    } else {
       $this->contact->addError('Could not split the apprenticeship reply into exactly one employer and one title');
     }
   }
 
-  function processOther($response){
+  function processOther($response) {
     $this->contact->data['Other'] = $response;
   }
-  
-  function processConfirmYearGroup($response){
-  	$response = strtolower($response);
-	  $response = str_replace("year", "", $response);
-	  $response = str_replace("y", "", $response);
-	  $response = str_replace(" ", "", $response);
-	
-  	if(array_key_exists($response, $this->mapping["yearGroupMap"])){
-  		$this->contact->data['CurrentSchool']['year-group'] = $this->mapping["yearGroupMap"][$response];
-  	}else{
-  		$this->contact->addError('Could not determine the year group');
-  	}
-  }
-  
-  function update($contact){
-    foreach($contact->data as $key => $nada){
-      call_user_func(array($this, 'update'.$key), $contact);
+
+  function processConfirmYearGroup($response) {
+    $response = strtolower($response);
+    $response = str_replace("year", "", $response);
+    $response = str_replace("y", "", $response);
+    $response = str_replace(" ", "", $response);
+
+    if (array_key_exists($response, $this->mapping["yearGroupMap"])) {
+      $this->contact->data['CurrentSchool']['year-group'] = $this->mapping["yearGroupMap"][$response];
+    } else {
+      $this->contact->addError('Could not determine the year group');
     }
   }
-  
-  function updateCurrentOccupation($contact){
-  	$updateParam = array(
-  		"version" => 3,
-  		"id" => $contact->id,
-  	);
-  	
-  	switch($contact->data["CurrentOccupation"]) {
-  		case "university":
-  		case "educationNotUni";
-  			$updateParam["custom_33"] = "In_education";
-  			break;
-  		case "work":
-  			$updateParam["custom_33"] = "Working_including_internships";
-  			break;
-  		case "apprenticeship":
-  			$updateParam["custom_33"] = "On_an_Apprenticeship";
-  			break;
-  		case "somethingElse":
-  			$updateParam["custom_33"] = "Doing_something_else";
-  			break;
-  		case "haveNotLeft":
-  			$updateParam["custom_33"] = "In_education";
-  			break;
-  	}
 
-  	if(
-  		array_key_exists("custom_33", $updateParam) &&
-  		strlen($updateParam["custom_33"]) > 0
-  	) {
-  		civicrm_api("Contact", "update", $updateParam);
-  	}
+  function update($contact) {
+    foreach ($contact->data as $key => $nada) {
+      call_user_func(array($this, 'update' . $key), $contact);
+    }
   }
 
-  function updateEducation($contact){
-  	$updateParam = array(
-  		"version" => 3,
-  		"id" => $contact->id,
-  		"custom_76" => $contact->data['Education']['institution_id'],
-  	);
-  	
-    if(isset($contact->data['Education']["course_data"])){
-	    foreach($contact->data['Education']["course_data"] as $key => $value) {
-	    	if(is_array($value)) {
-	    		// Need to append to a multi select
-	    		$updateParam[$key] = $this->updateMultiSelect($key, $value, $contact->id);
-	    	} else {
-	    		$updateParam[$key] = $value;
-	    	}
-	    }
+  function updateCurrentOccupation($contact) {
+    $updateParam = array(
+      "version" => 3,
+      "id" => $contact->id,
+    );
+
+    switch ($contact->data["CurrentOccupation"]) {
+      case "university":
+      case "educationNotUni";
+        $updateParam["custom_33"] = "In_education";
+        break;
+      case "work":
+        $updateParam["custom_33"] = "Working_including_internships";
+        break;
+      case "apprenticeship":
+        $updateParam["custom_33"] = "On_an_Apprenticeship";
+        break;
+      case "somethingElse":
+        $updateParam["custom_33"] = "Doing_something_else";
+        break;
+      case "haveNotLeft":
+        $updateParam["custom_33"] = "In_education";
+        break;
     }
 
-  	civicrm_api("Contact", "update", $updateParam);
-  }
-  
-  function updateUniversity($contact){
-  	$updateParam = array(
-  		"version" => 3,
-  		"id" => $contact->id,
-  		"custom_68" => "Doing_a_course_at_a_university",
-  		"custom_49" => $contact->data['University']['institution_id'],
-  		"custom_53" => $contact->data['University']['subject'],
-  	);
-  	civicrm_api("Contact", "update", $updateParam);
-  }
-  
-  function updateJob($contact){
-  	// TODO: What fields should this update?
-  	$updateParam = array(
-  		"version" => 3,
-  		"id" => $contact->id,
-  		"job_title" => $contact->data['Job']['job-title'],
-  		"current_employer" => $contact->data['Job']['employer'],
-  	);
-  	civicrm_api("Contact", "update", $updateParam);
+    if (
+        array_key_exists("custom_33", $updateParam) &&
+        strlen($updateParam["custom_33"]) > 0
+    ) {
+      civicrm_api("Contact", "update", $updateParam);
+    }
   }
 
-  function updateOther($contact){
-  	$updateParam = array(
-  		"version" => 3,
-  		"id" => $contact->id,
-  		"custom_34" => $contact->data['Other'],
-  	);
-  	civicrm_api("Contact", "update", $updateParam);
+  function updateEducation($contact) {
+    $updateParam = array(
+      "version" => 3,
+      "id" => $contact->id,
+      "custom_76" => $contact->data['Education']['institution_id'],
+    );
+
+    if (isset($contact->data['Education']["course_data"])) {
+      foreach ($contact->data['Education']["course_data"] as $key => $value) {
+        if (is_array($value)) {
+          // Need to append to a multi select
+          $updateParam[$key] = $this->updateMultiSelect($key, $value, $contact->id);
+        } else {
+          $updateParam[$key] = $value;
+        }
+      }
+    }
+
+    civicrm_api("Contact", "update", $updateParam);
+  }
+
+  function updateUniversity($contact) {
+    $updateParam = array(
+      "version" => 3,
+      "id" => $contact->id,
+      "custom_68" => "Doing_a_course_at_a_university",
+      "custom_49" => $contact->data['University']['institution_id'],
+      "custom_53" => $contact->data['University']['subject'],
+    );
+    civicrm_api("Contact", "update", $updateParam);
+  }
+
+  function updateJob($contact) {
+    // TODO: What fields should this update?
+    $updateParam = array(
+      "version" => 3,
+      "id" => $contact->id,
+      "job_title" => $contact->data['Job']['job-title'],
+      "current_employer" => $contact->data['Job']['employer'],
+    );
+    civicrm_api("Contact", "update", $updateParam);
+  }
+
+  function updateOther($contact) {
+    $updateParam = array(
+      "version" => 3,
+      "id" => $contact->id,
+      "custom_34" => $contact->data['Other'],
+    );
+    civicrm_api("Contact", "update", $updateParam);
   }
 
   /**
@@ -571,20 +572,20 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
   static function getOrCreateOrg($orgName, $source = NULL) {
     // Does an organisation by that name already exist?
     $orgGetResult = civicrm_api('Contact', 'get', array(
-      'version'           => 3,
-      'sequential'        => 1,
-      'contact_type'      => 'Organization',
+      'version' => 3,
+      'sequential' => 1,
+      'contact_type' => 'Organization',
       'organization_name' => $orgName,
-      'is_deleted'        => 0,
+      'is_deleted' => 0,
     ));
 
     if (civicrm_error($orgGetResult)) {
       // Failed to get (not the same thing as returning no results)
       CRM_Core_Error::debug_log_message(
-        "Contact.get failed in " . __METHOD__ . "\n" .
-        "\t\$orgName: $orgName\n" .
-        "\t\$source:  $source\n" .
-        "\tError:    {$orgGetResult['error_message']}"
+          "Contact.get failed in " . __METHOD__ . "\n" .
+          "\t\$orgName: $orgName\n" .
+          "\t\$source:  $source\n" .
+          "\tError:    {$orgGetResult['error_message']}"
       );
       return NULL;
     }
@@ -592,62 +593,59 @@ class CRM_Chainsms_Translator_FFNov12 extends CRM_Chainsms_Translator_AbstractTr
     if ($orgGetResult['count'] == 0) {
       // If not existing, create them
       $orgCreateResult = civicrm_api('Contact', 'create', array(
-        'version'           => 3,
-        'contact_type'      => 'Organization',
+        'version' => 3,
+        'contact_type' => 'Organization',
         'organization_name' => $orgName,
-        'source'            => $source,
+        'source' => $source,
       ));
 
       if (civicrm_error($orgCreateResult)) {
         // Failed to create
         CRM_Core_Error::debug_log_message(
-          "Contact.create failed in " . __METHOD__ . "\n" .
-          "\t\$orgName: $orgName\n" .
-          "\t\$source:  $source\n" .
-          "\tError:    {$orgCreateResult['error_message']}"
+            "Contact.create failed in " . __METHOD__ . "\n" .
+            "\t\$orgName: $orgName\n" .
+            "\t\$source:  $source\n" .
+            "\tError:    {$orgCreateResult['error_message']}"
         );
         return NULL;
-      }
-
-      else {
+      } else {
         // Successfully created
         return $orgCreateResult['id'];
       }
-    }
-
-    else {
+    } else {
       // If existing, pick the first one of however many orgs with that name
       return $orgGetResult['values'][0]['id'];
     }
   }
 
   function updateApprenticeship($contact) {
-  	$updateParam = array(
-  		'version'   => 3,
-  		'id'        => $contact->id,
-  		'custom_69' => $contact->data['Apprenticeship']['title'],
+    $updateParam = array(
+      'version' => 3,
+      'id' => $contact->id,
+      'custom_69' => $contact->data['Apprenticeship']['title'],
       'custom_70' => self::getOrCreateOrg($contact->data['Apprenticeship']['employer'], 'SMS Tracking Survey'),
-  	);
-  	civicrm_api("Contact", "update", $updateParam);
+    );
+    civicrm_api("Contact", "update", $updateParam);
   }
 
-  function updateCurrentSchool($contact){
-  	$updateParam = array(
-  			"version" => 3,
-  			"id" => $contact->id,
-  	);
-  	
-  	if($contact->data['CurrentSchool']['year-group'] == "thirteen") {
-  		$updateParam["custom_12"] = "thirteen";
-  		$updateParam["custom_32"] = $this->generateLeavingDate(0);
-  	} else if($contact->data['CurrentSchool']['year-group'] == "twelve") {
-  		$updateParam["custom_12"] = "thirteen";
-  		$updateParam["custom_32"] = $this->generateLeavingDate(1);
-  	} else if($contact->data['CurrentSchool']['year-group'] == "eleven") {
-  		$updateParam["custom_12"] = "eleven";
-  		$updateParam["custom_32"] = $this->generateLeavingDate(0);
-  	}
-  	
-  	civicrm_api("Contact", "update", $updateParam);
+  function updateCurrentSchool($contact) {
+    $updateParam = array(
+      "version" => 3,
+      "id" => $contact->id,
+    );
+
+    if ($contact->data['CurrentSchool']['year-group'] == "thirteen") {
+      $updateParam["custom_12"] = "thirteen";
+      $updateParam["custom_32"] = $this->generateLeavingDate(0);
+    } else if ($contact->data['CurrentSchool']['year-group'] == "twelve") {
+      $updateParam["custom_12"] = "thirteen";
+      $updateParam["custom_32"] = $this->generateLeavingDate(1);
+    } else if ($contact->data['CurrentSchool']['year-group'] == "eleven") {
+      $updateParam["custom_12"] = "eleven";
+      $updateParam["custom_32"] = $this->generateLeavingDate(0);
+    }
+
+    civicrm_api("Contact", "update", $updateParam);
   }
+
 }

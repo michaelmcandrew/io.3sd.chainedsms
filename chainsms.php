@@ -2,7 +2,7 @@
 
 require_once 'chainsms.civix.php';
 
-const SURVEY_SUBMENU_LABEL = 'SMS Survey';
+    const SURVEY_SUBMENU_LABEL = 'SMS Survey';
 
 /**
  * Implementation of hook_civicrm_config
@@ -29,11 +29,10 @@ function chainsms_civicrm_install() {
   CRM_Core_BAO_Setting::setItem(array(), 'org.thirdsectordesign.chainsms', 'swear_list');
 
   // TODO create permission to view swear filter page.
-  
   // Create SMS Conversation Activity Type
   $smsConversationActivityType = CRM_Core_OptionGroup::getValue('activity_type', 'SMS Conversation', 'name');
 
-  if (empty($smsConversationActivityType)){
+  if (empty($smsConversationActivityType)) {
     $createSMSConversationActivityApiParams = array(
       'version' => 3,
       'sequential' => 1,
@@ -56,7 +55,7 @@ function chainsms_civicrm_install() {
       KEY index_question_id (msg_template_id),
       KEY index_next_question_id (next_msg_template_id)
     ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1');
-  
+
   return _chainsms_civix_civicrm_install();
 }
 
@@ -135,9 +134,9 @@ function chainsms_post_add_details_to_mass_sms($op, $objectName, $objectId, &$ob
   }
 
   $mailing = civicrm_api('Mailing', 'getsingle', array(
-    'version'    => 3,
+    'version' => 3,
     // Matching on both the mailing ID and subject just to make sure
-    'id'   => $activity['source_record_id'],
+    'id' => $activity['source_record_id'],
     'name' => $activity['subject'],
   ));
   if (civicrm_error($mailing)) {
@@ -148,7 +147,7 @@ function chainsms_post_add_details_to_mass_sms($op, $objectName, $objectId, &$ob
   $activityUpdateResult = civicrm_api('Activity', 'create', array(
     'version' => 3,
     // Update existing Activity, copying body text from the Mailing that sent this Mass SMS
-    'id'      => $activity['id'],
+    'id' => $activity['id'],
     'details' => $mailing['body_text'],
   ));
   if (civicrm_error($activityUpdateResult)) {
@@ -160,14 +159,13 @@ function chainsms_post_add_details_to_mass_sms($op, $objectName, $objectId, &$ob
 function chainsms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   //try and return as quickly as possible
   if (
-    $objectName == 'Activity' &&
-    $objectRef->activity_type_id == CRM_Core_OptionGroup::getValue('activity_type', 'Inbound SMS', 'name')
+      $objectName == 'Activity' &&
+      $objectRef->activity_type_id == CRM_Core_OptionGroup::getValue('activity_type', 'Inbound SMS', 'name')
   ) {
     chainsms_post_respond_to_inbound_sms($op, $objectName, $objectId, $objectRef);
-  }
-  elseif (
-    $objectName == 'Activity' && $op == 'create' &&
-    $objectRef->activity_type_id == CRM_Core_OptionGroup::getValue('activity_type', 'Mass SMS', 'name')
+  } elseif (
+      $objectName == 'Activity' && $op == 'create' &&
+      $objectRef->activity_type_id == CRM_Core_OptionGroup::getValue('activity_type', 'Mass SMS', 'name')
   ) {
     chainsms_post_add_details_to_mass_sms($op, $objectName, $objectId, $objectRef);
   }
@@ -178,24 +176,24 @@ function chainsms_civicrm_post($op, $objectName, $objectId, &$objectRef) {
  *
  * implementation of civicrm_civicrm_navigationMenu
  */
-function chainsms_civicrm_navigationMenu( &$params ) {
+function chainsms_civicrm_navigationMenu(&$params) {
   $sAdministerMenuId = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_Navigation', 'Administer', 'id', 'name');
   $sSystemSettingsMenuId = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_Navigation', 'System Settings', 'id', 'name');
 
   //  Get the maximum key of $params
-  $insertKey = ( max( array_keys($params) ) ) +2;
+  $insertKey = ( max(array_keys($params)) ) + 2;
 
-  $params[$sAdministerMenuId]['child'][$sSystemSettingsMenuId]['child'][$insertKey] = array (
-    'attributes' => array (
-       'label'      => 'SMS Survey Swear Filter',
-       'name'       => 'SMSSurveySwearFilter',
-       'url'        => 'civicrm/chainsms/swearfilter',
-       'permission' => null,
-       'operator'   => null,
-       'separator'  => null,
-       'parentID'   => $sSystemSettingsMenuId,
-       'navID'      => $insertKey,
-       'active'     => 1
+  $params[$sAdministerMenuId]['child'][$sSystemSettingsMenuId]['child'][$insertKey] = array(
+    'attributes' => array(
+      'label' => 'SMS Survey Swear Filter',
+      'name' => 'SMSSurveySwearFilter',
+      'url' => 'civicrm/smssurvey/swearfilter',
+      'permission' => null,
+      'operator' => null,
+      'separator' => null,
+      'parentID' => $sSystemSettingsMenuId,
+      'navID' => $insertKey,
+      'active' => 1
     )
   );
 
@@ -204,29 +202,29 @@ function chainsms_civicrm_navigationMenu( &$params ) {
 
   // Create the SMS Survey submenu
   //  Get the maximum key of $params
-  $insertKey = max( array_keys($params[$mailingsMenuId]['child'])) +1;
+  $insertKey = max(array_keys($params[$mailingsMenuId]['child'])) + 1;
 
   $subMenuId = $insertKey;
 
-  $params[$mailingsMenuId]['child'][$subMenuId] = array (
-    'attributes' => array (
-       'label'      => SURVEY_SUBMENU_LABEL,
-       'name'       => SURVEY_SUBMENU_LABEL,
-       'url'        => null,
-       'permission' => null,
-       'operator'   => null,
-       'separator'  => null,
-       'parentID'   => $mailingsMenuId,
-       'navID'      => $subMenuId,
-       'active'     => 1
+  $params[$mailingsMenuId]['child'][$subMenuId] = array(
+    'attributes' => array(
+      'label' => SURVEY_SUBMENU_LABEL,
+      'name' => SURVEY_SUBMENU_LABEL,
+      'url' => null,
+      'permission' => null,
+      'operator' => null,
+      'separator' => null,
+      'parentID' => $mailingsMenuId,
+      'navID' => $subMenuId,
+      'active' => 1
     )
   );
 
   // Populate the submenu
-  $chainSmsMessagesKey = max(array_keys($params[$mailingsMenuId]['child']))+1;
+  $chainSmsMessagesKey = max(array_keys($params[$mailingsMenuId]['child'])) + 1;
 
-  $params[$mailingsMenuId]['child'][$subMenuId]['child'][$chainSmsMessagesKey] = array (
-    'attributes' => array (
+  $params[$mailingsMenuId]['child'][$subMenuId]['child'][$chainSmsMessagesKey] = array(
+    'attributes' => array(
       'label' => 'Chain SMS Messages',
       'name' => 'SMSSurveyChains',
       'url' => 'civicrm/smssurvey/chains',
@@ -239,10 +237,10 @@ function chainsms_civicrm_navigationMenu( &$params ) {
     )
   );
 
-  $smsSurveyTranslateKey = $chainSmsMessagesKey+1;
+  $smsSurveyTranslateKey = $chainSmsMessagesKey + 1;
 
-  $params[$mailingsMenuId]['child'][$subMenuId]['child'][$smsSurveyTranslateKey] = array (
-    'attributes' => array (
+  $params[$mailingsMenuId]['child'][$subMenuId]['child'][$smsSurveyTranslateKey] = array(
+    'attributes' => array(
       'label' => 'Translate Responses',
       'name' => 'Translator',
       'url' => 'civicrm/smssurvey/translate',
@@ -255,10 +253,10 @@ function chainsms_civicrm_navigationMenu( &$params ) {
     )
   );
 
-  $smsSurveyCleanKey = $smsSurveyTranslateKey+1;
+  $smsSurveyCleanKey = $smsSurveyTranslateKey + 1;
 
-  $params[$mailingsMenuId]['child'][$subMenuId]['child'][$smsSurveyCleanKey] = array (
-    'attributes' => array (
+  $params[$mailingsMenuId]['child'][$subMenuId]['child'][$smsSurveyCleanKey] = array(
+    'attributes' => array(
       'label' => 'Clean Translated Responses',
       'name' => 'TranslationCleaner',
       'url' => 'civicrm/smssurvey/translationcleaning',
