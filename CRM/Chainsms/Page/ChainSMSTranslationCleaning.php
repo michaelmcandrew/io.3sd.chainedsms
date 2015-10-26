@@ -34,7 +34,7 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
         activity_type_id = %1";
 
     $dao = CRM_Core_DAO::executeQuery($sqlDistinctTranslationCampaigns, array(
-      '%1' => array($this->SMSConversationActivityTypeId, 'Integer'),
+      1 => array($this->SMSConversationActivityTypeId, 'Integer'),
     ));
 
     $aDistinctCampaigns = array();
@@ -79,11 +79,11 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
         LIMIT 1 OFFSET %5";
 
     $sqlParams = array(
-      '%1' => array(self::RECORD_TYPE_ID_SOURCE, 'Integer'),
-      '%2' => array($sCampaignName, 'String'),
-      '%3' => array(ACTIVITY_STATUS_SCHEDULED_VALUE, 'Integer'),
-      '%4' => array($this->SMSConversationActivityTypeId, 'Integer'),
-      '%5' => array($offset, 'Integer'),
+      1 => array(self::RECORD_TYPE_ID_SOURCE, 'Integer'),
+      2 => array($sCampaignName, 'String'),
+      3 => array(self::ACTIVITY_STATUS_SCHEDULED_VALUE, 'Integer'),
+      4 => array($this->SMSConversationActivityTypeId, 'Integer'),
+      5 => array($offset, 'Integer'),
     );
 
     $dao = CRM_Core_DAO::executeQuery($sqlGetInvalidConversation, $sqlParams);
@@ -128,10 +128,10 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
         1";
 
     $dao = CRM_Core_DAO::executeQuery($sqlGetPreviousMassSMSActivity, array(
-      '%1' => array(self::RECORD_TYPE_ID_TARGET, 'Integer'),
-      '%2' => array($this->MassSMSActivityTypeId, 'Integer'),
-      '%3' => array($iContactId, 'String'),
-      '%4' => array($iContactId, 'Integer'),
+      1 => array(self::RECORD_TYPE_ID_TARGET, 'Integer'),
+      2 => array($this->MassSMSActivityTypeId, 'Integer'),
+      3 => array($iContactId, 'String'),
+      4 => array($iContactId, 'Integer'),
     ));
 
     while ( $dao->fetch() ){
@@ -219,12 +219,12 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
         civicrm_activity
       WHERE
         is_deleted = 0 AND
-        subject = %1 AND ".$sFilterString."
+        subject = %1 AND " . $sFilterString . "
       status_id = %2";
 
     $dao = CRM_Core_DAO::executeQuery($sqlGetSMSConversationCount, array(
-      '%1' => array($sCampaignName, 'String'),
-      '%2' => array(ACTIVITY_STATUS_SCHEDULED_VALUE, 'Integer'),
+      1 => array($sCampaignName, 'String'),
+      2 => array(ACTIVITY_STATUS_SCHEDULED_VALUE, 'Integer'),
     ));
 
     while($dao->fetch()){

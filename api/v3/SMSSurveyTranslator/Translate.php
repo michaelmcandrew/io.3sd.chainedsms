@@ -43,8 +43,6 @@ function civicrm_api3_s_m_s_survey_translator_translate($params) {
   $activitiesCreatedOrUpdated = $translator->update();
 
   $returnValues = array(array('activitiesCreatedOrUpdated' => $activitiesCreatedOrUpdated));
-  
-  watchdog("Translation Stats", "created or updated", array(), WATCHDOG_ERROR);
 
   return civicrm_api3_create_success($returnValues, $params, 'SMSSurveyTranslator', 'Translate');
 }

@@ -67,7 +67,7 @@ function chainsms_civicrm_uninstall() {
   // Wipe the swear filters.
   $dao = CRM_Core_DAO::executeQuery("DELETE FROM civicrm_setting WHERE group_name = 'org.thirdsectordesign.chainsms'");
   // Remove the added table
-  $dao = CRM_Core_DAO::executeQuery("DROP TABLE civicrm_chainsms_answer");
+  $dao = CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS civicrm_chainsms_answer");
   return _chainsms_civix_civicrm_uninstall();
 }
 
