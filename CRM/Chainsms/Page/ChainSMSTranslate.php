@@ -3,23 +3,30 @@
 require_once 'CRM/Core/Page.php';
 
 class CRM_Chainsms_Page_ChainSMSTranslate extends CRM_Core_Page {
-  function getGroupsForMailing($iMailingId){
-  	$sqlGetMailingGroups = "
+  /**
+   * @param integer $iMailingId the mailing id
+   * @return string, mailing group ids separated by a comma 
+   */
+  function getGroupsForMailing($iMailingId) {
+    $sqlGetMailingGroups = '
   	  SELECT entity_id
   	  FROM civicrm_mailing_group
-  	  WHERE mailing_id=".$iMailingId;
+  	  WHERE mailing_id=%1';
 
-	$dao = CRM_Core_DAO::executeQuery($sqlGetMailingGroups);
+    $dao = CRM_Core_DAO::executeQuery($sqlGetMailingGroups, array(1 => array($iMailingId, 'Integer')));
 
-	$aMailingGroups = array();
+    $aMailingGroups = array();
 
-	while($dao->fetch()){
-		$aMailingGroups[] = $dao->entity_id;
-	}
+    while ($dao->fetch()) {
+      $aMailingGroups[] = $dao->entity_id;
+    }
 
-	return implode(",", $aMailingGroups);
+    return implode(",", $aMailingGroups);
   }
-
+  
+ /**
+  *  Build the page.
+  */
   function run() {
 
 // TODO REFACTOR on later versions of civicrm this shouldn't be needed, just use the api instead
@@ -40,32 +47,33 @@ class CRM_Chainsms_Page_ChainSMSTranslate extends CRM_Core_Page {
 
     $aSMSMailings = array();
 
-	while($dao->fetch()){
-      $aSMSMailings[]= array(
+    while ($dao->fetch()) {
+      $aSMSMailings[] = array(
         'id' => $dao->id,
         'name' => $dao->name,
         'send_date' => $dao->send_date,
         'limit_date' => $dao->limit_date,
         'group_ids' => $this->getGroupsForMailing($dao->id),
-	  );
-	}
+      );
+    }
 
     $this->assign('aSMSMailings', $aSMSMailings);
 
-    $aGroups = civicrm_api("Group", "get", array ('version' => '3','sequential' =>'1', 'rowCount' => 0));
+    $aGroups = civicrm_api("Group", "get", array('version' => '3', 'sequential' => '1', 'rowCount' => 0));
 
-    $aGroupsToPass =  array();
+    $aGroupsToPass = array();
     foreach ($aGroups['values'] as $aEachGroup) {
       $aGroupToPass = array();
-      $aGroupToPass['id'] = $aEachGroup['id'] ;
+      $aGroupToPass['id'] = $aEachGroup['id'];
       $aGroupToPass['title'] = $aEachGroup['title'];
       $aGroupsToPass[] = $aGroupToPass;
     }
-    
+
     $this->assign('aGroups', $aGroupsToPass);
-    
+
     $this->assign('aTranslationOptions', CRM_Chainsms_Translator::getTranslatorClasses());
-    
+
     parent::run();
   }
+
 }
