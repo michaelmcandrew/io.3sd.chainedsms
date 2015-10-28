@@ -14,4 +14,4 @@ Features:
 
 5. Interface to do the translation.
 
-This commit is a culmination of the work done by John Kirk, at and for Future First, including contributions from David Knoll (david@futurefirst.org.uk). Based on original work by Michael McAndrew of the Core Team and Third Sector Design.
+This commit is a culmination of the work done by John Kirk, both at and then for Future First, including contributions from David Knoll. Based on original work by Michael McAndrew of the CiviCRM Core Team and Third Sector Design. With thanks to Nicolas Ganivet of CiviDesk.
