@@ -2,7 +2,7 @@
 
 require_once 'CRM/Core/Page.php';
 
-    CONST ACTIVITY_STATUS_SCHEDULED_VALUE = 1; // TODO get rid of hardcoded status index
+const ACTIVITY_STATUS_SCHEDULED_VALUE = 1; // TODO get rid of hardcoded status index
 
 class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
 
@@ -51,14 +51,14 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
   /*
    * Get the next invalid conversation in this campaign.
    * @param string $sCampaignName (sanitised)
-   * @param string $sFilter the selected invalid filter
+   * @param string $sCleanedFilter the selected invalid filter (cleaned in the run function)
    * @param int $offset
    */
 
-  function getInvalidSMSConversationInCampaign($sCampaignName, $sFilter, $offset) {
+  function getInvalidSMSConversationInCampaign($sCampaignName, $sCleanedFilter, $offset) {
     $sFilterString = "";
-    if ($sFilter != "") {
-      $sFilterString = " details LIKE '%$sFilter%' AND ";
+    if ($sCleanedFilter != "") {
+      $sFilterString = " details LIKE '%$sCleanedFilter%' AND ";
     }
 
     $sqlGetInvalidConversation = "
@@ -134,7 +134,7 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
     $dao = CRM_Core_DAO::executeQuery($sqlGetPreviousMassSMSActivity, array(
           1 => array(self::RECORD_TYPE_ID_TARGET, 'Integer'),
           2 => array($this->MassSMSActivityTypeId, 'Integer'),
-          3 => array($iContactId, 'String'),
+          3 => array($sBeforeDate, 'String'),
           4 => array($iContactId, 'Integer'),
     ));
 
@@ -156,7 +156,7 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
    */
 
   function getSMSMessagesBetween($iContactId, $sFromDate, $sToDate) {
-    $sqlGetSMSMessagesBetween = "
+    $getSMSMessagesBetweenSql = "
       SELECT
         ca.id AS id,
         subject,
@@ -168,16 +168,24 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
       JOIN
         civicrm_activity_contact AS cac
         ON  cac.activity_id    = ca.id
-        AND cac.record_type_id = " . self::RECORD_TYPE_ID_TARGET . "
+        AND cac.record_type_id = %1
       WHERE
         is_deleted != '1' AND
-        (activity_type_id = " . $this->OutboundSMSActivityTypeId . " OR
-        activity_type_id = " . $this->InboundSMSActivityTypeId . ") AND
-        activity_date_time >= '" . $sFromDate . "' AND
-        activity_date_time <= DATE_ADD('" . $sToDate . "', INTERVAL 1 WEEK) AND
-        cac.contact_id = " . $iContactId;
+        (activity_type_id = %2 OR
+        activity_type_id = %3) AND
+        activity_date_time >= %4 AND
+        activity_date_time <= DATE_ADD(%5, INTERVAL 1 WEEK) AND
+        cac.contact_id = %6";
 
-    $dao = CRM_Core_DAO::executeQuery($sqlGetSMSMessagesBetween);
+    $getSMSMessagesBetweenParams = array(
+      1 => array(self::RECORD_TYPE_ID_TARGET, 'Integer'),
+      2 => array($this->OutboundSMSActivityTypeId, 'Integer'),
+      3 => array($this->InboundSMSActivityTypeId, 'Integer'),
+      4 => array((string) $sFromDate, 'String'),
+      5 => array((string) $sToDate, 'String'),
+      6 => array($iContactId, 'Integer'),
+    );
+    $dao = CRM_Core_DAO::executeQuery($getSMSMessagesBetweenSql, $getSMSMessagesBetweenParams);
 
     $aResults = array();
 
@@ -206,14 +214,14 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
   /*
    * Get the number of campaigns in this conversations.
    * @param string $sCampaignName sanitised name of the campaign
-   * @param string $sFilter the type of error to filter by
+   * @param string $sCleanedFilter the type of error to filter by (sanitised in run)
    */
 
-  function countInvalidSMSConversations($sCampaignName, $sFilter) {
+  function countInvalidSMSConversations($sCampaignName, $sCleanedFilter) {
 
     $sFilterString = "";
-    if ($sFilter != "") {
-      $sFilterString = " details LIKE '%$sFilter%' AND ";
+    if ($sCleanedFilter != "") {
+      $sFilterString = " details LIKE '%$sCleanedFilter%' AND ";
     }
 
     $sqlGetSMSConversationCount = "
@@ -292,12 +300,12 @@ class CRM_Chainsms_Page_ChainSMSTranslationCleaning extends CRM_Core_Page {
   /*
    * Initialise the translation to clean
    * @param string $sCleanedCampaignName sanitised campaign name
-   * @param string $sFilter the type of error
+   * @param string $sCleanedFilter the type of error. This is cleaned in the run function.
    * @param int $iOffset the offset from the first unclean translation in the list
    */
 
-  private function initialiseTranslationToClean($sCleanedCampaignName, $sFilter, $iOffset) {
-    $aSMSConversationActivity = $this->getInvalidSMSConversationInCampaign($sCleanedCampaignName, $sFilter, $iOffset);
+  private function initialiseTranslationToClean($sCleanedCampaignName, $sCleanedFilter, $iOffset) {
+    $aSMSConversationActivity = $this->getInvalidSMSConversationInCampaign($sCleanedCampaignName, $sCleanedFilter, $iOffset);
 
     $this->assign('aSMSConversationActivity', $aSMSConversationActivity);
 
