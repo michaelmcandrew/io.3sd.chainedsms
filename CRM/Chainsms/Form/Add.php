@@ -2,23 +2,26 @@
 
 class CRM_Chainsms_Form_Add extends CRM_Core_Form {
 
-  function preProcess(){
+  function preProcess() {
+
   }
 
-  function setDefaultValues(){
+  function setDefaultValues() {
 
     //if we have been past an answer ID, then add those defaults to the form
-    if(($msg_template_id = CRM_Utils_Array::value('msg_template_id', $_GET)) && CRM_Utils_Array::value('action', $_GET)=='add'){
-      return array('msg_template' => $msg_template_id);
 
+    if (($msg_template_id = CRM_Utils_Array::value('msg_template_id', $_GET)) && CRM_Utils_Array::value('action', $_GET) == 'add') {
+
+      return array('msg_template' => $msg_template_id);
     }
-    if(($id = CRM_Utils_Array::value('id', $_GET)) && (CRM_Utils_Array::value('action', $_GET)=='delete' ||CRM_Utils_Array::value('action', $_GET)=='update')){
+    if (($id = CRM_Utils_Array::value('id', $_GET)) && (CRM_Utils_Array::value('action', $_GET) == 'delete' || CRM_Utils_Array::value('action', $_GET) == 'update')) {
       //if we are passed an id and this is an update
 
       $query = "SELECT * FROM civicrm_chainsms_answer WHERE id=%1";
       $params[1] = array($id, 'Integer');
       $result = CRM_Core_DAO::executeQuery($query, $params);
       $result->fetch();
+
       //TODO: if we can't find an answer ID, then error
 
       $this->assign('answer_for_delete', $result->answer);
@@ -34,13 +37,14 @@ class CRM_Chainsms_Form_Add extends CRM_Core_Form {
   }
 
   function buildQuickForm() {
+
     $this->assign('action', 'action');
-    $this->add( 'hidden', 'id');
-    if(CRM_Utils_Array::value('action', $_GET)=='add' || CRM_Utils_Array::value('action', $_GET)=='update'){
-      $this->templates = array(0 => '- select -') + CRM_Core_BAO_MessageTemplates::getMessageTemplates(FALSE);
-      $this->add( 'select', 'msg_template', ts('Initial message'), $this->templates, FALSE);
-      $this->add( 'text', 'answer', ts('Answer'), $this->templates, FALSE);
-      $this->add( 'select', 'next_msg_template', ts('Next message'), $this->templates, FALSE);
+    $this->add('hidden', 'id');
+    if (CRM_Utils_Array::value('action', $_GET) == 'add' || CRM_Utils_Array::value('action', $_GET) == 'update') {
+      $this->templates = array(0 => '- select -') + CRM_Core_BAO_MessageTemplate::getMessageTemplates(FALSE);
+      $this->add('select', 'msg_template', ts('First outbound message'), $this->templates, FALSE);
+      $this->add('text', 'answer', ts('When receive'), array());
+      $this->add('select', 'next_msg_template', ts('Send next message'), $this->templates, FALSE);
       $buttons[] = array(
         'name' => ts('Save'),
         'type' => 'submit',
@@ -51,8 +55,7 @@ class CRM_Chainsms_Form_Add extends CRM_Core_Form {
         'type' => 'cancel',
         'name' => ts('Cancel'),
       );
-
-    }elseif(CRM_Utils_Array::value('action', $_GET)=='delete'){
+    } elseif (CRM_Utils_Array::value('action', $_GET) == 'delete') {
       $buttons[] = array(
         'name' => ts('Delete'),
         'type' => 'submit',
@@ -66,44 +69,45 @@ class CRM_Chainsms_Form_Add extends CRM_Core_Form {
     }
     $this->addButtons($buttons);
   }
-  function postProcess(){
 
-
-    $submittedValues = $this->getSubmitValues();
-    if($this->_action == CRM_Core_Action::ADD || $this->_action == CRM_Core_Action::UPDATE){
+  function postProcess() {
+    //$submittedValues = $this->getSubmitValues();
+    $submittedValues = $this->_submitValues;
+    if ($this->_action == CRM_Core_Action::ADD || $this->_action == CRM_Core_Action::UPDATE) {
       $params[1] = array($submittedValues['msg_template'], 'Integer');
       $params[2] = array($submittedValues['answer'], 'String');
       $params[3] = array($submittedValues['next_msg_template'], 'Integer');
     }
-    if($this->_action == CRM_Core_Action::DELETE || $this->_action == CRM_Core_Action::UPDATE){
+    if ($this->_action == CRM_Core_Action::DELETE || $this->_action == CRM_Core_Action::UPDATE) {
       $params[4] = array($submittedValues['id'], 'Integer');
     }
     //if we are updating, update
-    if($this->_action == CRM_Core_Action::ADD){
+
+    if ($this->_action == CRM_Core_Action::ADD) {
       $query = "INSERT INTO civicrm_chainsms_answer SET
-        msg_template_id = %1,
-        answer = %2,
-        next_msg_template_id = %3";
+msg_template_id = %1,
+answer = %2,
+next_msg_template_id = %3";
       $result = CRM_Core_DAO::executeQuery($query, $params);
       CRM_Core_Session::setStatus('Your answer has been added');
-      CRM_Utils_System::redirect('/civicrm/sms/chains');
+      CRM_Utils_System::redirect('/civicrm/smssurvey/chains');
       ////set message and redirect
-    }elseif($this->_action == CRM_Core_Action::UPDATE){
+    } elseif ($this->_action == CRM_Core_Action::UPDATE) {
       $query = "UPDATE civicrm_chainsms_answer SET
-        msg_template_id = %1,
-        answer = %2,
-        next_msg_template_id = %3
-        WHERE id=%4";
+msg_template_id = %1,
+answer = %2,
+next_msg_template_id = %3
+WHERE id=%4";
       $result = CRM_Core_DAO::executeQuery($query, $params);
       CRM_Core_Session::setStatus('Your answer has been updated');
-      CRM_Utils_System::redirect('/civicrm/sms/chains');
-
-    }elseif($this->_action == CRM_Core_Action::DELETE){
+      CRM_Utils_System::redirect('/civicrm/smssurvey/chains');
+    } elseif ($this->_action == CRM_Core_Action::DELETE) {
       $query = "DELETE FROM civicrm_chainsms_answer
-        WHERE id=%4";
+WHERE id=%4";
       $result = CRM_Core_DAO::executeQuery($query, $params);
       CRM_Core_Session::setStatus('Your answer has been deleted');
-      CRM_Utils_System::redirect('/civicrm/sms/chains');
+      CRM_Utils_System::redirect('/civicrm/smssurvey/chains');
     }
   }
+
 }

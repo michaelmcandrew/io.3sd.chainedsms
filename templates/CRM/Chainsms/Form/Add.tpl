@@ -11,9 +11,12 @@ Are you sure you want to delete this answer?
 <tr><td class="label">Next template ID</td><td class="view-value">{$next_msg_template_for_delete}</td></tr>
 {elseif $action eq 2 OR $action eq 1}
 
-{* Action = update *}
+{* Action = update or create*}
 <tr><td class="label">{$form.msg_template.label}</td><td class="view-value">{$form.msg_template.html}</td></tr>
-<tr><td class="label">{$form.answer.label}</td><td class="view-value">{$form.answer.html}</td></tr>
+<tr><td class="label">{$form.answer.label}</td><td class="view-value">{$form.answer.html}<br/>
+    <em>Leave blank to send the next message anyway regardless of response.</em>
+</td></tr>
+
 <tr><td class="label">{$form.next_msg_template.label}</td><td class="view-value">{$form.next_msg_template.html}</td></tr>
 
 

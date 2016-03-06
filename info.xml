@@ -1,18 +1,21 @@
 <?xml version="1.0"?>
 <extension key="org.thirdsectordesign.chainsms" type="module">
   <file>chainsms</file>
-  <name>Chained SMS</name>
-  <description>Allows for outbound SMS to be sent in reply to inbound SMS</description>
+  <name>SMS Survey</name>
+  <description>Allows for outbound SMS to be sent in reply to inbound SMS. 
+      The results can be "translated" from the text messages into the user fields.
+      Creates a menu entry under Mailing -> SMS Survey.
+  </description>
   <license>GNU AFFERO GENERAL PUBLIC LICENSE Version 3 </license>
   <maintainer>
-    <author>Michael McAndrew</author>
-    <email>michaelmcandrew@thirdsectordesign.org</email>
+    <author>John Kirk (JohnFF)</author>
+    <email>john@civifirst.com</email>
   </maintainer>
-  <releaseDate>2012-10-25</releaseDate>
-  <version>0.1</version>
+  <releaseDate>2014-05-28</releaseDate>
+  <version>1.0</version>
   <develStage>alpha</develStage>
   <compatibility>
-    <ver>4.2</ver>
+    <ver>4.4</ver>
   </compatibility>
   <comments></comments>
   <civix>
