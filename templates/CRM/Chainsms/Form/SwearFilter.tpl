@@ -5,7 +5,8 @@ to have your own list of words that you want to censor, for instance, swear word
 Replies that contain these words listed below will not be inserted into your 
 contacts' data fields when the survey is translated.
 <br/><br/>
-You will be able to view their full reply in the Translation Cleaner tool.
+You will be able to view their full reply, including offensive language, in the 
+Translation Cleaner tool.
 <br/><br/>
 <div id='swearWords' style='display: none'>
 <div>
@@ -31,6 +32,7 @@ commas.</em>
 <script type="text/javascript" language="javascript">
   jQuery('#showSwears').click(function(){
       jQuery('#swearWords').show();
+      jQuery('#showSwears').remove();
   });
 </script>
 {/literal}

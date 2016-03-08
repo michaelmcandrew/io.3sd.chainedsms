@@ -29,7 +29,7 @@
 		});
 	});
 	
-	function updateStats(){
+	function fetchStats(){
 		cj().crmAPI ('SMSSurveyStats','Get',{ 
 		  'sequential' :'1'
 		}, { success:function (data){
@@ -53,8 +53,11 @@
 	
 	// handle the tabs
 	jQuery('.selector').click(function(){
-		if(jQuery(this).attr('id') == 'StatsButton'){
-		  updateStats();
+		if ((jQuery(this).attr('id') == 'StatsButton')){
+                  // Is there only one row in the stats table? If so, go ahead and get the data.
+                  if (jQuery('#statsTable').children('tbody').children('tr:not(#statsTableTitleRow)').length == 0) {
+		    fetchStats();
+                  }
 		}
 		
 		jQuery('.Block').not('#'+jQuery(this).attr('selected')).hide();

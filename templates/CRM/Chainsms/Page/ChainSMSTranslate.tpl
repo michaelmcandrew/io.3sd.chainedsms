@@ -56,7 +56,7 @@ To translate a batch of messages, select an SMS Mailing from the following list<
 
 <div class="Block" id="StatsBlock" style="display:none">
 <table id="statsTable">
-<tr><th>Campaign</th><th>Date</th><th>Number Sent</th><th>Total translated</th><th>Couldn't be<br/>fully translated.</th><th>Fully translated</th></tr>
+<tr id='statsTableTitleRow'><th>Campaign</th><th>Date</th><th>Number Sent</th><th>Total translated</th><th>Couldn't be<br/>fully translated.</th><th>Fully translated</th></tr>
 
 </table>
 </div>
