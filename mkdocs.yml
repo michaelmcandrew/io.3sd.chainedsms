@@ -1,4 +1,5 @@
 site_name: Chained SMS
+repo_url: https://github.com/3sd/io.3sd.chainedsms
 theme: material
 pages:
 - About: index.md
